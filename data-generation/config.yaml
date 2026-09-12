@@ -1,0 +1,25 @@
+# Generador de datos para FINBAK S.A
+generation:
+  seed: 42
+  export_formats:
+    - csv
+    - parquet
+  anomalies:
+    duplicate_transactions: 150
+    out_of_range_dates: 200
+    null_values_percentage: 0.05
+  database_target:
+    driver: "ODBC Driver 18 for SQL Server"
+  tables:
+    TB_CLIENTES_CORE:
+      volume: 10000
+    TB_PRODUCTOS_CAT:
+      volume: 50
+    TB_MOV_FINANCIEROS:
+      volume: 500000
+    TB_OBLIGACIONES:
+      volume: 30000
+    TB_SUCURSALES_RED:
+      volume: 200
+    TB_COMISIONES_LOG:
+      volume: 80000

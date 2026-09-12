@@ -1,0 +1,28 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Caché de Python
+__pycache__/
+*.pyc
+
+# Carpetas de datos locales
+data/
+data-generation/data_output/
+
+# Archivos de Terraform
+.terraform
+terraform.tfstate.d/
+*.tfvars
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+crash.log
+.terraform.lock.hcl
+
+# Otros
+.vscode/
+.DS_Store

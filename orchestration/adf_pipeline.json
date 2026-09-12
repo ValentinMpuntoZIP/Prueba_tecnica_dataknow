@@ -1,0 +1,108 @@
+{
+  "name": "Pipeline_Fibank_vcmg",
+  "properties": {
+    "description": "Pipeline Medallion end-to-end con control de errores, reintentos y alertas",
+    "activities": [
+      {
+        "name": "Execute_Bronze",
+        "type": "Custom",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.01:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "command": "py pipelines/capa_bronze.py"
+        }
+      },
+      {
+        "name": "Execute_Silver",
+        "type": "Custom",
+        "dependsOn": [
+          {
+            "activity": "Execute_Bronze",
+            "dependencyConditions": [ "Succeeded" ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.01:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "command": "py pipelines/capa_silver.py"
+        }
+      },
+      {
+        "name": "Execute_Gold",
+        "type": "Custom",
+        "dependsOn": [
+          {
+            "activity": "Execute_Silver",
+            "dependencyConditions": [ "Succeeded" ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.01:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "command": "py pipelines/capa_gold.py"
+        }
+      },
+      {
+        "name": "Send_Failure_Alert",
+        "type": "WebActivity",
+        "dependsOn": [
+          {
+            "activity": "Execute_Bronze",
+            "dependencyConditions": [ "Failed" ]
+          },
+          {
+            "activity": "Execute_Silver",
+            "dependencyConditions": [ "Failed" ]
+          },
+          {
+            "activity": "Execute_Gold",
+            "dependencyConditions": [ "Failed" ]
+          }
+        ],
+        "typeProperties": {
+          "url": "https://prod-00.eastus.logic.azure.com/workflows/alert_failure",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "message": "Se detectó un fallo crítico en el pipeline Medallion de FinBank."
+          }
+        }
+      }
+    ],
+    "triggers": [
+      {
+        "name": "DailyScheduleTrigger",
+        "type": "ScheduleTrigger",
+        "typeProperties": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2026-09-08T02:00:00Z",
+            "timeZone": "SA Pacific Standard Time"
+          }
+        }
+      }
+    ]
+  }
+}
